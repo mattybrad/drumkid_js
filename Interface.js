@@ -35,6 +35,17 @@ var Interface = (function() {
 	var mouseIsDown = false;
 	
 	function init() {
+		// initialise param values from stored values if available
+		var storedVal;
+		$.each(sliders,function(i,val) {
+			storedVal = $.jStorage.get(val.name);
+			if(storedVal === null) {
+				val.value = Config.defaultParams[val.name];
+			} else {
+				val.value = storedVal;
+			}
+		});
+		
 		cvs = $('#screen')[0];
 		ctx = cvs.getContext('2d');
 		
@@ -53,6 +64,14 @@ var Interface = (function() {
 			setTimeout(drawCall,20);
 		}
 		drawCall();
+		
+		$('body').keydown(function(ev) {
+			if(ev.which === 32) {
+				Tap.tap();
+				var tempo = Tap.getTempo();
+				if(tempo !== null) sliders[0].value = (Tap.getTempo()-30)/200;
+			}
+		});
 		
 		$('#screen').mousedown(function(ev) {
 			mouseIsDown = true;
@@ -92,8 +111,9 @@ var Interface = (function() {
 		$.each(sliders,function(i,val) {
 			if(x>val.x&&x<val.x+val.width) foundSlider = val; 
 		});
-		if(foundSlider) {
-			foundSlider.value = Math.max(Math.min(1-(y/foundSlider.height),1),0); 
+		if(foundSlider !== null) {
+			foundSlider.value = Math.max(Math.min(1-(y/foundSlider.height),1),0);
+			$.jStorage.set(foundSlider.name,foundSlider.value); 
 		}
 	}
 	
