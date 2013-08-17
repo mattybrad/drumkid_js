@@ -104,8 +104,3 @@ var Interface = (function() {
 	}
 	
 })();
-
-window.onload = function() {
-	Interface.init();
-	Drum.init();
-}
