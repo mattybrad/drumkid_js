@@ -1,5 +1,6 @@
 var Interface = (function() {
 	
+	var colours = ['Crimson','Orange','Gold','Yellow','GreenYellow','LimeGreen','LightSkyBlue','RoyalBlue','Indigo','Violet'];
 	var cvs,ctx;
 	var sliders = [
 		{
@@ -28,6 +29,9 @@ var Interface = (function() {
 		},
 		{
 			name: "percussion"
+		},
+		{
+			name: "pitch"
 		}
 	]
 	
@@ -93,9 +97,9 @@ var Interface = (function() {
 		
 		ctx.textAlign = "center";
 		$.each(sliders,function(i,val) {
-			ctx.fillStyle = "#999999";
+			ctx.fillStyle = colours[i];
 			ctx.fillRect(val.x,0,val.width,val.height);
-			ctx.fillStyle = "#CCCCCC";
+			ctx.fillStyle = "#999999";
 			ctx.fillRect(val.x,0,val.width,val.height*(1-val.value));
 			ctx.fillStyle = "#000000";
 			ctx.fillText(val.name,val.x+val.width/2,val.height+30);

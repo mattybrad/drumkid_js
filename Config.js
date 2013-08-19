@@ -1,6 +1,6 @@
 var Config = {
 	
-	samples: ["kick","snare","closedhat","openhat","tomlow","tommid","tomhigh","clap"],
+	samples: ["kick","snare","closedhat","tomlow","tommid","tomhigh"],
 	lookahead : 25.0,
 	scheduleAheadTime : 0.1,
 	noteResolution : 0,
@@ -12,7 +12,8 @@ var Config = {
 		zoom: 0.5,
 		sloppiness: 0.1,
 		toms: 0.3,
-		percussion: 0.0
+		percussion: 0.0,
+		pitch: 0.5
 	}
 	
 };

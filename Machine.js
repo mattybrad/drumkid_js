@@ -2,7 +2,7 @@ var Machine = (function () {
 	
 	"use strict";
 	
-	var ctx, sounds = {}, instruments = [], timerID, nextNoteTime = 0, notesInQueue = [], step = 0;
+	var ctx, sounds = {}, instruments = [], timerID, nextNoteTime = 0, notesInQueue = [], step = 0, reverb;
 	
 	function init ( soundDataObject ) {
 		// attempt to initialise audio context
@@ -13,6 +13,8 @@ var Machine = (function () {
 			// tell user that there is a problem
 		}
 		
+		reverb = ctx.createConvolver();
+		//reverb.connect(ctx.destination);
 		var s, decodeTally = 0, decodeTotal = 0;
 		// get number of sounds
 		for ( s in soundDataObject ) {
@@ -42,20 +44,6 @@ var Machine = (function () {
 		} );
 	}
 	
-	function scheduleNote(beatNumber,time) {
-		notesInQueue.push( { note: beatNumber, time: time} );
-		var zoomMultiplier = getZoomMultiplier(beatNumber);
-		$.each(instruments,function(i,val) {
-			var blend = Interface.getSliderValue("blend");
-			var blendedBeat = (1-blend) * (Beats.beats[4][0][val] ? Beats.beats[4][0][val][beatNumber] : 0) + blend * (Beats.beats[4][1][val] ? Beats.beats[4][1][val][beatNumber] : 0);
-			var tomVal = Interface.getSliderValue("toms");
-			var tomMultiplier = $.inArray(val,["highTom","lowTom","midTom"])!=-1 ? Math.min(2*tomVal,1) : Math.min(2*(1-tomVal),1);
-			if(val=="kick") tomMultiplier = 1;
-			var vel = tomMultiplier * zoomMultiplier * Math.min(blendedBeat + Math.random()*1.0*Interface.getSliderValue("hyperactivity"),1);
-			playSound(val,vel,time+Math.random()*0.2*Interface.getSliderValue("sloppiness"));
-		});
-	}
-	
 	function nextNote() {
 		var secondsPerBeat = 60.0 / (30+Interface.getSliderValue("tempo")*200);
 		nextNoteTime += 0.25 * secondsPerBeat;
@@ -80,10 +68,10 @@ var Machine = (function () {
 			var blend = Interface.getSliderValue("blend");
 			var blendedBeat = (1-blend) * (Beats.beats[4][0][val] ? Beats.beats[4][0][val][beatNumber] : 0) + blend * (Beats.beats[4][1][val] ? Beats.beats[4][1][val][beatNumber] : 0);
 			var tomVal = Interface.getSliderValue("toms");
-			var tomMultiplier = $.inArray(val,["highTom","lowTom","midTom"])!=-1 ? Math.min(2*tomVal,1) : Math.min(2*(1-tomVal),1);
+			var tomMultiplier = $.inArray(val,["tomlow","tommid","tomhigh"])!=-1 ? Math.min(2*tomVal,1) : Math.min(2*(1-tomVal),1);
 			if(val=="kick") tomMultiplier = 1;
-			var vel = tomMultiplier * zoomMultiplier * Math.min(blendedBeat + Math.random()*1.0*Interface.getSliderValue("hyperactivity"),1);
-			playSound(val,vel,time+Math.random()*0.2*Interface.getSliderValue("sloppiness"));
+			var vel = tomMultiplier * zoomMultiplier * Math.min(blendedBeat + Math.random()*0.6*Interface.getSliderValue("hyperactivity"),1);
+			playSound(val,vel,time+Math.random()*0.1*Interface.getSliderValue("sloppiness"));
 		});
 	}
 	
@@ -110,8 +98,11 @@ var Machine = (function () {
 	
 	function playSound(name,vel,t) {
 		var source = ctx.createBufferSource();
+		if(name!=="kick") source.playbackRate.value = Interface.getSliderValue("pitch")*2;
 		source.buffer = sounds[name];
-		source.gain.value = vel;
+		source.gain.value = 0.3 * vel;
+		//source.connect(reverb);
+		//reverb.connect(ctx.destination);
 		source.connect(ctx.destination);
 		source.start(t);
 	}
