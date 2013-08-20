@@ -104,7 +104,7 @@ var Machine = (function () {
 		//source.connect(reverb);
 		//reverb.connect(ctx.destination);
 		source.connect(ctx.destination);
-		source.start(t);
+		source.noteOn(t);
 	}
 	
 	return {
