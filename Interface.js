@@ -1,7 +1,7 @@
 var Interface = (function() {
 	
 	var colours = ['Crimson','Orange','Gold','Yellow','GreenYellow','LimeGreen','LightSkyBlue','RoyalBlue','Indigo','Violet'];
-	var cvs,ctx;
+	var cvs,ctx,isBlurred = false;
 	var sliders = [
 		{
 			name: "tempo",
@@ -83,16 +83,11 @@ var Interface = (function() {
 			slidersObj[val.name] = val;
 		});
 		
-		function drawCall() {
-			draw();
-			setTimeout(drawCall,20);
-		}
-		setTimeout(drawCall,4000);
 		var logoImg = new Image();
 		logoImg.onload = onLogoLoad;
 		logoImg.src = "graphics/logo.png";
 		function onLogoLoad() {
-			ctx.drawImage(logoImg,0.25*cvs.width,0.5*cvs.height - 0.4*(logoImg.height/logoImg.width) * cvs.width,0.5*cvs.width,0.5*(logoImg.height/logoImg.width) * cvs.width);
+			ctx.drawImage(logoImg,0.25*cvs.width,0.5*cvs.height - 0.2*(logoImg.height/logoImg.width) * cvs.width,0.5*cvs.width,0.5*(logoImg.height/logoImg.width) * cvs.width);
 		}
 		
 		$('body').keydown(function(ev) {
@@ -132,6 +127,31 @@ var Interface = (function() {
 				changeValue(val.clientX,val.clientY);
 			});
 		});
+		
+		window.addEventListener('focus', function() {
+			isBlurred = false;
+		});
+		
+		window.addEventListener('blur', function() {
+			isBlurred = true;
+		});
+		
+		// populate beat select menus
+		var beatOptions = "";
+		var initText = "";
+		$.each(Beats.beats[4],function(i,val) {
+			beatOptions += "<option value='" + i.toString() + "'>" + val.name + "</option>";
+		});
+		console.log(beatOptions);
+		$('#beatSelect1,#beatSelect2').html(beatOptions);
+	}
+	
+	function showSliders() {
+		function drawCall() {
+			draw();
+			setTimeout(drawCall,20);
+		}
+		drawCall();
 	}
 	
 	function draw() {
@@ -154,6 +174,12 @@ var Interface = (function() {
 		return slidersObj[name].value;
 	}
 	
+	function getBeatValue(beatNum) {
+		var s = document.getElementById("beatSelect"+beatNum.toString());
+		var val = s.options[s.selectedIndex].value;
+		return parseInt(val);
+	}
+	
 	function changeValue(x,y) {
 		var foundSlider = null;
 		var sliderWidth = cvs.width/sliders.length;
@@ -169,21 +195,38 @@ var Interface = (function() {
 	
 	function getParamString() {
 		var returnString = "",paramId,paramVal;
+		
+		// add values for each slider
 		$.each(sliders,function(i,val) {
+			returnString += getString(val);
+		});
+		
+		function getString(val) {
 			paramId = val.id.toString(16);
 			if(paramId.length === 1) paramId = "0" + paramId;
 			paramVal = Math.round(val.value * 255).toString(16);
 			if(paramVal.length === 1) paramVal = "0" + paramVal;
-			returnString += paramId + paramVal;
-		});
+			return paramId + paramVal;
+		}
+		
+		// add values for beat selections
+		returnString += getString({id:200,value:getBeatValue(1)}) + getString({id:201,value:getBeatValue(2)});
+		
 		return returnString;
+	}
+	
+	function returnIsBlurred() {
+		return isBlurred;
 	}
 	
 	return {
 		init: init,
 		draw: draw,
 		getSliderValue: getSliderValue,
-		getParamString: getParamString
+		getBeatValue: getBeatValue,
+		getParamString: getParamString,
+		showSliders: showSliders,
+		isBlurred: returnIsBlurred
 	}
 	
 })();

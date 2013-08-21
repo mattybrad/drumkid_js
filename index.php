@@ -42,8 +42,7 @@
 	<body>
 		<canvas id="screen" width="1200" height="800">Canvas not supported</canvas>
 		<p id="bottomSection">
-			<span id="tweetButton">Tweet My Beat</span> / <span id="facebookButton">Share My Beat on Facebook</span>
+			<select id="beatSelect1"></select> / <select id="beatSelect2"></select> /<span id="tweetButton">Tweet My Beat</span> / <span id="facebookButton">Share My Beat on Facebook</span>
 		</p>
-		<br><br><br><br><br><br><br><br><img src="graphics/logo.png">
 	</body>
 </html>

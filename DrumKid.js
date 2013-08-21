@@ -1,11 +1,10 @@
 // Based on Web Audio Metronome by Chris Wilson https://github.com/cwilso/metronome/
 
 // To do before sharing beta:
-// - beat chooser + selection of beats
-// - twitter share
-// - facebook share
+// - bigger selection of beats
+// - initialise beat selection from php string
+// - unify localstorage and php string initialisation (both should use hex string)
 // - copy/paste share thing
-// - check compatibility
 
 (function () {
 
@@ -17,6 +16,12 @@
 			event.preventDefault();
 		}, false);
 		
+		// check compatibility
+		if(window.AudioContext===undefined&&window.webkitAudioContext===undefined) {
+			window.location.href = "incompatible.html";
+			return false;
+		}
+		
 		// init parameters from PHP string
 		var phpParams;
 		if(drumKidPhpInitString.length>0&&drumKidPhpInitString.charAt(0)!=="<") {
@@ -25,10 +30,15 @@
 			phpParams = false;
 		}
 		
+		// initialise GUI
+		Interface.init(phpParams);
+		
 		// load all audio files
 		Loader.loadAudioMultiple( Config.samples, function () {
-			Interface.init(phpParams);
-			Machine.init( Loader.sounds );
+			setTimeout(function() {
+				Machine.init( Loader.sounds );
+				Interface.showSliders();
+			},3000);
 		});
 	};
 	

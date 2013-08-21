@@ -54,7 +54,7 @@ var Machine = (function () {
 	}
 	
 	function scheduler() {
-		while( nextNoteTime < ctx.currentTime + Config.scheduleAheadTime ) {
+		while( nextNoteTime < ctx.currentTime + Config.scheduleAheadTime + (Interface.isBlurred() ? 1.1 : 0) ) {
 			scheduleNote(step,nextNoteTime);
 			nextNote();
 		}
@@ -64,13 +64,16 @@ var Machine = (function () {
 	function scheduleNote(beatNumber,time) {
 		notesInQueue.push( { note: beatNumber, time: time} );
 		var zoomMultiplier = getZoomMultiplier(beatNumber);
+		var beat1 = Interface.getBeatValue(1), beat2 = Interface.getBeatValue(2);
 		$.each(instruments,function(i,val) {
 			var blend = Interface.getSliderValue("blend");
-			var blendedBeat = (1-blend) * (Beats.beats[4][0][val] ? Beats.beats[4][0][val][beatNumber] : 0) + blend * (Beats.beats[4][1][val] ? Beats.beats[4][1][val][beatNumber] : 0);
+			var blendedBeat = (1-blend) * (Beats.beats[4][beat1][val] ? Beats.beats[4][beat1][val][beatNumber] : 0) + blend * (Beats.beats[4][beat2][val] ? Beats.beats[4][beat2][val][beatNumber] : 0);
 			var tomVal = Interface.getSliderValue("toms");
 			var tomMultiplier = $.inArray(val,["tomlow","tommid","tomhigh"])!=-1 ? Math.min(2*tomVal,1) : Math.min(2*(1-tomVal),1);
 			if(val=="kick") tomMultiplier = 1;
-			var vel = tomMultiplier * zoomMultiplier * Math.min(blendedBeat + Math.random()*0.6*Interface.getSliderValue("hyperactivity"),1);
+			var percussionVal = Interface.getSliderValue("percussion");
+			var percussionMultiplier = $.inArray(val,["claves","rim","shaker","closedhat"])!=-1 ? Math.min(2*percussionVal,1) : Math.min(2*(1-percussionVal),1);
+			var vel = 0.5 * (tomMultiplier + percussionMultiplier) * zoomMultiplier * Math.min(blendedBeat + Math.random()*0.6*Interface.getSliderValue("hyperactivity"),1);
 			playSound(val,vel,time+Math.random()*0.1*Interface.getSliderValue("sloppiness"));
 		});
 	}
@@ -79,7 +82,7 @@ var Machine = (function () {
 		var zoom = 5*Interface.getSliderValue("zoom");
 		if($.inArray(beatNumber,[0])!=-1) {
 			// 0
-			return 1; 
+			return 1; lo
 		} else if($.inArray(beatNumber,[0,8])!=-1) {
 			// 0, 8
 			return zoom > 1 ? 1 : zoom;

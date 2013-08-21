@@ -1,8 +1,9 @@
 var Config = {
 	
-	samples: ["kick","snare","closedhat","tomlow","tommid","tomhigh"],
+	samples: ["kick","snare","closedhat","tomlow","tommid","tomhigh","clap","rim","claves","shaker"],
 	lookahead : 25.0,
 	scheduleAheadTime : 0.1,
+	scheduleAheadTimeBlurred: 1.1,
 	noteResolution : 0,
 	noteLength : 0.05,
 	defaultParams: {
