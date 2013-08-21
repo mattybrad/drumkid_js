@@ -6,11 +6,28 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 		<style>
 			body {
+				font-family: Arial, Helvetica, sans-serif;
 				margin: 0 0 0 0;
 				padding: 0 0 0 0;
 				overflow: hidden;
 			}
+			
+			#bottomSection {
+				text-align: center;
+			}
+			
+			#bottomSection span {
+				text-decoration: underline;
+				cursor: pointer;
+			}
+			
+			#bottomSection span:hover {
+				color: #999999;
+			}
 		</style>
+		<script>
+			var drumKidPhpInitString = "<?php echo $_GET['b']; ?>";
+		</script>
 		<script src="jquery.min.js"></script>
 		<script src="json2.js"></script>
 		<script src="jstorage.js"></script>
@@ -24,5 +41,9 @@
 	</head>
 	<body>
 		<canvas id="screen" width="1200" height="800">Canvas not supported</canvas>
+		<p id="bottomSection">
+			<span id="tweetButton">Tweet My Beat</span> / <span id="facebookButton">Share My Beat on Facebook</span>
+		</p>
+		<br><br><br><br><br><br><br><br><img src="graphics/logo.png">
 	</body>
 </html>

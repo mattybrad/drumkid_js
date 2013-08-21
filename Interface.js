@@ -5,57 +5,76 @@ var Interface = (function() {
 	var sliders = [
 		{
 			name: "tempo",
-			value: 0.6
+			value: 0.6,
+			id: 0
 		},
 		{
 			name: "blend",
-			value: 0.5
+			value: 0.5,
+			id: 1
 		},
 		{
 			name: "hyperactivity",
-			value: 0.4
+			value: 0.4,
+			id: 2
 		},
 		{
 			name: "zoom",
-			value: 0.6
+			value: 0.6,
+			id: 3
 		},
 		{
 			name: "sloppiness",
-			value: 0.1
+			value: 0.1,
+			id: 4
 		},
 		{
 			name: "toms",
-			value: 0.25
+			value: 0.25,
+			id: 5
 		},
 		{
-			name: "percussion"
+			name: "percussion",
+			id: 6
 		},
 		{
-			name: "pitch"
+			name: "pitch",
+			id: 7
 		}
 	]
 	
 	var slidersObj = {};
 	var mouseIsDown = false;
 	
-	function init() {
+	function init(phpParams) {
 		// initialise param values from stored values if available
-		var storedVal;
-		$.each(sliders,function(i,val) {
-			storedVal = $.jStorage.get(val.name);
-			if(storedVal === null) {
-				val.value = Config.defaultParams[val.name];
-			} else {
-				val.value = storedVal;
-			}
-		});
+		if(phpParams !== false) {
+			$.each(sliders,function(i,val) {
+				if(phpParams[val.id] !== undefined) {
+					val.value = phpParams[val.id];
+				} else {
+					val.value = Config.defaultParams[val.name];
+				}
+				$.jStorage.set(val.name,val.value);
+			});
+		} else {
+			var storedVal;
+			$.each(sliders,function(i,val) {
+				storedVal = $.jStorage.get(val.name);
+				if(storedVal === null) {
+					val.value = Config.defaultParams[val.name];
+				} else {
+					val.value = storedVal;
+				}
+			});
+		}
 		
 		cvs = $('#screen')[0];
 		cvs.width = window.innerWidth;
-		cvs.height = window.innerHeight;
+		cvs.height = window.innerHeight - 100;
 		window.onresize = function() {
 			cvs.width = window.innerWidth;
-			cvs.height = window.innerHeight;
+			cvs.height = window.innerHeight - 100;
 		}
 		ctx = cvs.getContext('2d');
 		
@@ -73,7 +92,7 @@ var Interface = (function() {
 		logoImg.onload = onLogoLoad;
 		logoImg.src = "graphics/logo.png";
 		function onLogoLoad() {
-			ctx.drawImage(logoImg,0.5*cvs.width - 0.25*logoImg.width,0.5*cvs.height - 0.4*(logoImg.height/logoImg.width) * cvs.width,0.5*cvs.width,0.5*(logoImg.height/logoImg.width) * cvs.width);
+			ctx.drawImage(logoImg,0.25*cvs.width,0.5*cvs.height - 0.4*(logoImg.height/logoImg.width) * cvs.width,0.5*cvs.width,0.5*(logoImg.height/logoImg.width) * cvs.width);
 		}
 		
 		$('body').keydown(function(ev) {
@@ -96,6 +115,16 @@ var Interface = (function() {
 			if(mouseIsDown) {
 				changeValue(ev.offsetX,ev.offsetY);
 			}
+		});
+		
+		$('#tweetButton').click(function(ev) {
+			var tweetText = encodeURIComponent("I just made a beat using DrumKid, the web's coolest drum machine!");
+			var relatedAccount = encodeURIComponent("matty_brad:The creator of DrumKid");
+			window.location.href = "https://twitter.com/share?url=http%3A%2F%2Fmattbradshawdesign.com%2Flab%2Fdrumkid%2F%3Fb=" + getParamString() + "&text=" + tweetText + "&related=" + relatedAccount;
+		});
+		
+		$('#facebookButton').click(function(ev) {
+			window.location.href = "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent("http://mattbradshawdesign.com/lab/drumkid/?b=" + getParamString());
 		});
 		
 		window.addEventListener('touchmove',function(ev) {
@@ -138,18 +167,23 @@ var Interface = (function() {
 		}
 	}
 	
-	function registerTouch() {
-		
-	}
-	
-	function deregisterTouch() {
-		
+	function getParamString() {
+		var returnString = "",paramId,paramVal;
+		$.each(sliders,function(i,val) {
+			paramId = val.id.toString(16);
+			if(paramId.length === 1) paramId = "0" + paramId;
+			paramVal = Math.round(val.value * 255).toString(16);
+			if(paramVal.length === 1) paramVal = "0" + paramVal;
+			returnString += paramId + paramVal;
+		});
+		return returnString;
 	}
 	
 	return {
 		init: init,
 		draw: draw,
-		getSliderValue: getSliderValue
+		getSliderValue: getSliderValue,
+		getParamString: getParamString
 	}
 	
 })();
