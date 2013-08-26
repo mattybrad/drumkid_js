@@ -18,16 +18,18 @@
 		
 		// check compatibility
 		if(window.AudioContext===undefined&&window.webkitAudioContext===undefined) {
-			window.location.href = "incompatible.html";
-			return false;
+			//window.location.href = "incompatible.html";
+			//return false;
 		}
 		
 		// init parameters from PHP string
 		var phpParams;
 		if(drumKidPhpInitString.length>0&&drumKidPhpInitString.charAt(0)!=="<") {
 			phpParams = decodeInitString(drumKidPhpInitString);
+		} else if($.jStorage.get("b") !== null) {
+			phpParams = decodeInitString($.jStorage.get("b"));;
 		} else {
-			phpParams = false;
+			phpParams = {};
 		}
 		
 		// initialise GUI
@@ -38,7 +40,7 @@
 			setTimeout(function() {
 				Machine.init( Loader.sounds );
 				Interface.showSliders();
-			},3000);
+			},1000);
 		});
 	};
 	

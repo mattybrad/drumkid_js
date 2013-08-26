@@ -1,6 +1,6 @@
 var Config = {
 	
-	samples: ["kick","snare","closedhat","tomlow","tommid","tomhigh","clap","rim","claves","shaker"],
+	samples: ["kick","snare","closedhat","tomlow","tommid","tomhigh","rim","claves","shaker"],
 	lookahead : 25.0,
 	scheduleAheadTime : 0.1,
 	scheduleAheadTimeBlurred: 1.1,
@@ -14,7 +14,8 @@ var Config = {
 		sloppiness: 0.1,
 		toms: 0.3,
 		percussion: 0.0,
-		pitch: 0.5
+		pitch: 0.5,
+		ceiling: 0
 	}
 	
 };

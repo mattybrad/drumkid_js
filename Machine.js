@@ -68,13 +68,15 @@ var Machine = (function () {
 		$.each(instruments,function(i,val) {
 			var blend = Interface.getSliderValue("blend");
 			var blendedBeat = (1-blend) * (Beats.beats[4][beat1][val] ? Beats.beats[4][beat1][val][beatNumber] : 0) + blend * (Beats.beats[4][beat2][val] ? Beats.beats[4][beat2][val][beatNumber] : 0);
-			var tomVal = Interface.getSliderValue("toms");
-			var tomMultiplier = $.inArray(val,["tomlow","tommid","tomhigh"])!=-1 ? Math.min(2*tomVal,1) : Math.min(2*(1-tomVal),1);
-			if(val=="kick") tomMultiplier = 1;
-			var percussionVal = Interface.getSliderValue("percussion");
-			var percussionMultiplier = $.inArray(val,["claves","rim","shaker","closedhat"])!=-1 ? Math.min(2*percussionVal,1) : Math.min(2*(1-percussionVal),1);
-			var vel = 0.5 * (tomMultiplier + percussionMultiplier) * zoomMultiplier * Math.min(blendedBeat + Math.random()*0.6*Interface.getSliderValue("hyperactivity"),1);
-			playSound(val,vel,time+Math.random()*0.1*Interface.getSliderValue("sloppiness"));
+			var tomMultiplier = $.inArray(val,["tomlow","tommid","tomhigh"])!=-1 ? Interface.getSliderValue("toms") : 1;
+			var percussionMultiplier = $.inArray(val,["claves","rim","shaker","closedhat"])!=-1 ? Interface.getSliderValue("percussion") : 1;
+			var kickMultiplier = val === "kick" ? Interface.getSliderValue("kick") : 1;
+			var snareMultiplier = val === "snare" ? Interface.getSliderValue("snare") : 1;
+			var hyperMultiplier = $.inArray(val,["kikck"])!=-1 ? 0 : Interface.getSliderValue("hyperactivity");
+			var vel = kickMultiplier * snareMultiplier * tomMultiplier * percussionMultiplier * zoomMultiplier * Math.min(blendedBeat + Math.random()*0.6 * hyperMultiplier,1);
+			if(vel < Interface.getSliderValue("ceiling")) vel = 0;
+			vel *= Interface.getSliderValue("volume");
+			playSound(val,2*vel,time+Math.random()*0.1*Interface.getSliderValue("sloppiness"));
 		});
 	}
 	

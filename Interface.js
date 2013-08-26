@@ -1,6 +1,6 @@
 var Interface = (function() {
 	
-	var colours = ['Crimson','Orange','Gold','Yellow','GreenYellow','LimeGreen','LightSkyBlue','RoyalBlue','Indigo','Violet'];
+	var colours = ['Crimson','Orange','Gold','Yellow','GreenYellow','LimeGreen','LightSkyBlue','RoyalBlue','Indigo','Violet','Crimson','Orange','Gold','Yellow','GreenYellow','LimeGreen','LightSkyBlue','RoyalBlue','Indigo','Violet'];
 	var cvs,ctx,isBlurred = false;
 	var sliders = [
 		{
@@ -40,6 +40,22 @@ var Interface = (function() {
 		{
 			name: "pitch",
 			id: 7
+		},
+		{
+			name: "ceiling",
+			id: 8
+		},
+		{
+			name: "kick",
+			id: 9
+		},
+		{
+			name: "snare",
+			id: 10
+		},
+		{
+			name: "volume",
+			id: 11
 		}
 	]
 	
@@ -54,17 +70,6 @@ var Interface = (function() {
 					val.value = phpParams[val.id];
 				} else {
 					val.value = Config.defaultParams[val.name];
-				}
-				$.jStorage.set(val.name,val.value);
-			});
-		} else {
-			var storedVal;
-			$.each(sliders,function(i,val) {
-				storedVal = $.jStorage.get(val.name);
-				if(storedVal === null) {
-					val.value = Config.defaultParams[val.name];
-				} else {
-					val.value = storedVal;
 				}
 			});
 		}
@@ -122,7 +127,7 @@ var Interface = (function() {
 			window.location.href = "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent("http://mattbradshawdesign.com/lab/drumkid/?b=" + getParamString());
 		});
 		
-		window.addEventListener('touchmove',function(ev) {
+		document.getElementById('screen').addEventListener('touchmove',function(ev) {
 			$.each(ev.targetTouches,function(i,val) {
 				changeValue(val.clientX,val.clientY);
 			});
@@ -144,6 +149,10 @@ var Interface = (function() {
 		});
 		console.log(beatOptions);
 		$('#beatSelect1,#beatSelect2').html(beatOptions);
+		console.log(Beats.beats[4][phpParams[200]].name);
+		console.log(Beats.beats[4][phpParams[201]].name);
+		$('#beatSelect1').val(phpParams[200]);
+		$('#beatSelect2').val(phpParams[201]);
 	}
 	
 	function showSliders() {
@@ -154,6 +163,30 @@ var Interface = (function() {
 		drawCall();
 	}
 	
+	function getRainbowColour(value) {
+		
+		var freq = 5 / sliders.length;
+		value *= freq;
+		
+		function numToHex(num) {
+			num = Math.max(0,num);
+			num = Math.min(1,num);
+			var outputString = Math.round(num * 255).toString(16);
+			if (outputString.length == 1) {
+				outputString = "0" + outputString;
+			}
+			return outputString;
+		}
+		
+		function rgbToColour(r,g,b) {
+			return '#' + numToHex(r) + numToHex(g) + numToHex(b);
+		}
+		
+		var returnColour = rgbToColour(0.5 * Math.sin(value + 0) + 0.5, 0.5 * Math.sin(value + 2) + 0.5, 0.5 * Math.sin(value + 4) + 0.5);
+		return returnColour;
+		
+	}
+	
 	function draw() {
 		ctx.clearRect(0,0,cvs.width,cvs.height);
 		
@@ -161,10 +194,10 @@ var Interface = (function() {
 		var sliderWidth = cvs.width/sliders.length;
 		var sliderHeight = 0.9 * cvs.height;
 		$.each(sliders,function(i,val) {
-			ctx.fillStyle = colours[i];
-			ctx.fillRect(i*sliderWidth,0,sliderWidth,sliderHeight);
-			ctx.fillStyle = "#FFFFFF";
-			ctx.fillRect(i*sliderWidth,0,sliderWidth,sliderHeight*(1-val.value));
+			ctx.fillStyle = getRainbowColour(i);
+			ctx.fillRect(i*sliderWidth,sliderHeight,sliderWidth,-sliderHeight*(val.value));
+			//ctx.fillStyle = "#FFFFFF";
+			//ctx.fillRect(i*sliderWidth-1,0,sliderWidth+2,sliderHeight*(1-val.value));
 			ctx.fillStyle = "#000000";
 			ctx.fillText(val.name,i*sliderWidth+sliderWidth/2,1.05*sliderHeight);
 		});
@@ -189,7 +222,7 @@ var Interface = (function() {
 		});
 		if(foundSlider !== null) {
 			foundSlider.value = Math.max(Math.min(1-(y/sliderHeight),1),0);
-			$.jStorage.set(foundSlider.name,foundSlider.value); 
+			$.jStorage.set("b",getParamString());
 		}
 	}
 	
