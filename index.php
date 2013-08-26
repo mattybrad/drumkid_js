@@ -16,13 +16,19 @@
 				text-align: center;
 			}
 			
-			#bottomSection span {
+			#tweetButton,#facebookButton {
 				text-decoration: underline;
 				cursor: pointer;
 			}
 			
-			#bottomSection span:hover {
+			#tweetButton:hover,#facebookButton:hover {
 				color: #999999;
+			}
+			
+			#beatsPerMinute {
+				display: inline-block;
+				text-align: right;
+				width: 4em;
 			}
 		</style>
 		<script>
@@ -42,7 +48,7 @@
 	<body>
 		<canvas id="screen" width="1200" height="800">Canvas not supported</canvas>
 		<p id="bottomSection">
-			<select id="beatSelect1"></select> / <select id="beatSelect2"></select> / <span id="tweetButton">Tweet My Beat</span> / <span id="facebookButton">Share My Beat on Facebook</span>
+			<span id="beatsPerMinute">?</span> BPM <button id="start">Start</button> <button id="stop">Stop</button> <select id="timeSignature"><option>3/4</option><option selected>4/4</option><option>5/4</option><option>7/4</option></select> <select id="beatSelect1"></select> <select id="beatSelect2"></select> / <span id="tweetButton">Tweet My Beat</span> / <span id="facebookButton">Share My Beat on Facebook</span>
 		</p>
 	</body>
 </html>

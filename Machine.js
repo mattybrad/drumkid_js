@@ -2,7 +2,7 @@ var Machine = (function () {
 	
 	"use strict";
 	
-	var ctx, sounds = {}, instruments = [], timerID, nextNoteTime = 0, notesInQueue = [], step = 0, reverb;
+	var ctx, sounds = {}, instruments = [], timerID, nextNoteTime = 0, notesInQueue = [], step = 0, reverb, playing = false, gainNode;
 	
 	function init ( soundDataObject ) {
 		// attempt to initialise audio context
@@ -27,14 +27,24 @@ var Machine = (function () {
 				decodeTally += 1;
 				if (decodeTally === decodeTotal) {
 					// drum machine is ready to start (all sounds ready)
-					setTimeout(function() {
-						step = 0;
-						nextNoteTime = ctx.currentTime;
-						scheduler();
-					}, 500);
+					
 				}
 			});
 		}
+	}
+	
+	function startBeat() {
+		if(playing === false) {
+			step = 0;
+			nextNoteTime = ctx.currentTime;
+			playing = true;
+			scheduler();
+		}
+	}
+	
+	function stopBeat() {
+		playing = false;
+		// need to figure out a way to stop the audio instantly
 	}
 	
 	function initSound ( name, data, callback ) {
@@ -45,7 +55,8 @@ var Machine = (function () {
 	}
 	
 	function nextNote() {
-		var secondsPerBeat = 60.0 / (30+Interface.getSliderValue("tempo")*200);
+		//var secondsPerBeat = 60.0 / (30+Interface.getSliderInterface.getSliderValue("tempo")*200);
+		var secondsPerBeat = 60.0 / Interface.decimalToBPM(Interface.getSliderValue("tempo"));
 		nextNoteTime += 0.25 * secondsPerBeat;
 		step += 1;
 		if(step === 16) {
@@ -54,11 +65,13 @@ var Machine = (function () {
 	}
 	
 	function scheduler() {
-		while( nextNoteTime < ctx.currentTime + Config.scheduleAheadTime + (Interface.isBlurred() ? 1.1 : 0) ) {
-			scheduleNote(step,nextNoteTime);
-			nextNote();
+		if(playing) {
+			while( nextNoteTime < ctx.currentTime + Config.scheduleAheadTime + (Interface.isBlurred() ? 1.1 : 0) ) {
+				scheduleNote(step,nextNoteTime);
+				nextNote();
+			}
+			timerID = window.setTimeout( scheduler, Config.lookahead );
 		}
-		timerID = window.setTimeout( scheduler, Config.lookahead );
 	}
 	
 	function scheduleNote(beatNumber,time) {
@@ -72,7 +85,7 @@ var Machine = (function () {
 			var percussionMultiplier = $.inArray(val,["claves","rim","shaker","closedhat"])!=-1 ? Interface.getSliderValue("percussion") : 1;
 			var kickMultiplier = val === "kick" ? Interface.getSliderValue("kick") : 1;
 			var snareMultiplier = val === "snare" ? Interface.getSliderValue("snare") : 1;
-			var hyperMultiplier = $.inArray(val,["kikck"])!=-1 ? 0 : Interface.getSliderValue("hyperactivity");
+			var hyperMultiplier = $.inArray(val,["clap"])!=-1 ? 0 : Interface.getSliderValue("hyperactivity");
 			var vel = kickMultiplier * snareMultiplier * tomMultiplier * percussionMultiplier * zoomMultiplier * Math.min(blendedBeat + Math.random()*0.6 * hyperMultiplier,1);
 			if(vel < Interface.getSliderValue("ceiling")) vel = 0;
 			vel *= Interface.getSliderValue("volume");
@@ -84,7 +97,7 @@ var Machine = (function () {
 		var zoom = 5*Interface.getSliderValue("zoom");
 		if($.inArray(beatNumber,[0])!=-1) {
 			// 0
-			return 1; lo
+			return 1;
 		} else if($.inArray(beatNumber,[0,8])!=-1) {
 			// 0, 8
 			return zoom > 1 ? 1 : zoom;
@@ -103,7 +116,7 @@ var Machine = (function () {
 	
 	function playSound(name,vel,t) {
 		var source = ctx.createBufferSource();
-		if(name!=="kick") source.playbackRate.value = Interface.getSliderValue("pitch")*2;
+		if(name!=="kick") source.playbackRate.value = (Interface.getSliderValue("pitch")+0.01)*2;
 		source.buffer = sounds[name];
 		source.gain.value = 0.3 * vel;
 		//source.connect(reverb);
@@ -113,7 +126,10 @@ var Machine = (function () {
 	}
 	
 	return {
-		init : init
+		init : init,
+		startBeat: startBeat,
+		stopBeat: stopBeat,
+		context: function(){return ctx}
 	};
 	
 }());

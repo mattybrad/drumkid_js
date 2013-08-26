@@ -15,7 +15,10 @@ var Config = {
 		toms: 0.3,
 		percussion: 0.0,
 		pitch: 0.5,
-		ceiling: 0
+		ceiling: 0,
+		kick: 0.7,
+		snare: 0.6,
+		volume: 0.7
 	}
 	
 };

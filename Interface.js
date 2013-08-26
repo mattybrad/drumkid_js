@@ -104,6 +104,7 @@ var Interface = (function() {
 		});
 		
 		$('#screen').mousedown(function(ev) {
+			changeValue(ev.offsetX,ev.offsetY);
 			mouseIsDown = true;
 		});
 		
@@ -115,6 +116,14 @@ var Interface = (function() {
 			if(mouseIsDown) {
 				changeValue(ev.offsetX,ev.offsetY);
 			}
+		});
+		
+		$('#start').mouseup(function(ev) {
+			Machine.startBeat();
+		});
+		
+		$('#stop').mouseup(function(ev) {
+			Machine.stopBeat();
 		});
 		
 		$('#tweetButton').click(function(ev) {
@@ -133,6 +142,20 @@ var Interface = (function() {
 			});
 		});
 		
+		document.getElementById('screen').addEventListener('touchstart',function(ev) {
+			$.each(ev.targetTouches,function(i,val) {
+				changeValue(val.clientX,val.clientY);
+			});
+		});
+		
+		document.getElementById('start').addEventListener('touchend',function(ev) {
+			Machine.startBeat();
+		});
+		
+		document.getElementById('stop').addEventListener('touchend',function(ev) {
+			Machine.stopBeat();
+		});
+		
 		window.addEventListener('focus', function() {
 			isBlurred = false;
 		});
@@ -147,12 +170,11 @@ var Interface = (function() {
 		$.each(Beats.beats[4],function(i,val) {
 			beatOptions += "<option value='" + i.toString() + "'>" + val.name + "</option>";
 		});
-		console.log(beatOptions);
 		$('#beatSelect1,#beatSelect2').html(beatOptions);
-		console.log(Beats.beats[4][phpParams[200]].name);
-		console.log(Beats.beats[4][phpParams[201]].name);
-		$('#beatSelect1').val(phpParams[200]);
-		$('#beatSelect2').val(phpParams[201]);
+		
+		console.log(phpParams[200]);
+		$('#beatSelect1').val(Math.round(255*phpParams[200]));
+		$('#beatSelect2').val(Math.round(255*phpParams[201]));
 	}
 	
 	function showSliders() {
@@ -201,6 +223,10 @@ var Interface = (function() {
 			ctx.fillStyle = "#000000";
 			ctx.fillText(val.name,i*sliderWidth+sliderWidth/2,1.05*sliderHeight);
 		});
+		
+		var bpmNum = Math.round(decimalToBPM(getSliderValue("tempo")*10))/10;
+		var bpmString = Math.round(bpmNum) == bpmNum ? bpmNum.toString() + ".0" : bpmNum.toString();
+		$('#beatsPerMinute').html(bpmString);
 	}
 	
 	function getSliderValue(name) {
@@ -238,18 +264,24 @@ var Interface = (function() {
 			paramId = val.id.toString(16);
 			if(paramId.length === 1) paramId = "0" + paramId;
 			paramVal = Math.round(val.value * 255).toString(16);
+			if(val.id == 201) console.log(val.value);
+			//console.log(paramVal);
 			if(paramVal.length === 1) paramVal = "0" + paramVal;
 			return paramId + paramVal;
 		}
 		
 		// add values for beat selections
-		returnString += getString({id:200,value:getBeatValue(1)}) + getString({id:201,value:getBeatValue(2)});
+		returnString += getString({id:200,value:getBeatValue(1)/255}) + getString({id:201,value:getBeatValue(2)/255});
 		
 		return returnString;
 	}
 	
 	function returnIsBlurred() {
 		return isBlurred;
+	}
+	
+	function decimalToBPM(decimal) {
+		return 30 + decimal * 200;
 	}
 	
 	return {
@@ -259,7 +291,9 @@ var Interface = (function() {
 		getBeatValue: getBeatValue,
 		getParamString: getParamString,
 		showSliders: showSliders,
-		isBlurred: returnIsBlurred
+		isBlurred: returnIsBlurred,
+		decimalToBPM: decimalToBPM,
+		getSliderValues: function(){return sliders}
 	}
 	
 })();
