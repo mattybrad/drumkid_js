@@ -40,12 +40,11 @@
 			setTimeout(function() {
 				Machine.init( Loader.sounds );
 				Interface.showSliders();
-			},4000);
+			},1000);
 		});
 	};
 	
 	function decodeInitString(initString) {
-		console.log(initString);
 		var i, params = {};
 		for (i = 0; i < initString.length; i += 4) {
 			params[parseInt("0x"+initString.substring(i,i+2))] = parseInt("0x"+initString.substring(i+2,i+4))/255;

@@ -15,6 +15,19 @@ var Beats = (function () {
 	beats[4][9] = {name:"Dancehall 2",kick:[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0],snare:[0,0,0,1,0,0,1,0,0,0,0,1,0,0,1,0]};
 	//beats[4][10] = {name:"Dancehall"};
 	
+	function init() {
+		var i;
+		for(i = 0; i < beats[4].length; i += 1) {
+			$.each(beats[4][i],function(j,val) {
+				if(j !== "name") {
+					beats[4][i][j] = val.concat(val);
+				};
+			});
+		}
+	}
+	
+	init();
+	
 	return {
 		beats : beats
 	}

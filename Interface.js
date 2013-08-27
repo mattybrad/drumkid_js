@@ -171,10 +171,12 @@ var Interface = (function() {
 			beatOptions += "<option value='" + i.toString() + "'>" + val.name + "</option>";
 		});
 		$('#beatSelect1,#beatSelect2').html(beatOptions);
+		$('#beatSelect1').val(0);
+		$('#beatSelect2').val(1);
 		
-		console.log(phpParams[200]);
-		$('#beatSelect1').val(Math.round(255*phpParams[200]));
-		$('#beatSelect2').val(Math.round(255*phpParams[201]));
+		if(phpParams[200] !== undefined) $('#beatSelect1').val(Math.round(255*phpParams[200]));
+		if(phpParams[201] !== undefined) $('#beatSelect2').val(Math.round(255*phpParams[201]));
+		if(phpParams[202] !== undefined) $('#timeSignature').val(Math.round(255*phpParams[202]));
 	}
 	
 	function showSliders() {
@@ -239,6 +241,12 @@ var Interface = (function() {
 		return parseInt(val);
 	}
 	
+	function getBeatsPerBar() {
+		var s = document.getElementById("timeSignature");
+		var bpb = parseInt(s.options[s.selectedIndex].value);
+		return bpb;
+	}
+	
 	function changeValue(x,y) {
 		var foundSlider = null;
 		var sliderWidth = cvs.width/sliders.length;
@@ -257,21 +265,22 @@ var Interface = (function() {
 		
 		// add values for each slider
 		$.each(sliders,function(i,val) {
-			returnString += getString(val);
+			returnString += getString(val,1);
 		});
 		
-		function getString(val) {
+		function getString(val,range) {
 			paramId = val.id.toString(16);
 			if(paramId.length === 1) paramId = "0" + paramId;
-			paramVal = Math.round(val.value * 255).toString(16);
-			if(val.id == 201) console.log(val.value);
-			//console.log(paramVal);
+			paramVal = Math.round(val.value * 255 / range).toString(16);
 			if(paramVal.length === 1) paramVal = "0" + paramVal;
 			return paramId + paramVal;
 		}
 		
 		// add values for beat selections
-		returnString += getString({id:200,value:getBeatValue(1)/255}) + getString({id:201,value:getBeatValue(2)/255});
+		returnString += getString({id:200,value:getBeatValue(1)},255) + getString({id:201,value:getBeatValue(2)},255);
+		
+		// add value for time signature
+		returnString += getString({id:202,value:getBeatsPerBar()},255);
 		
 		return returnString;
 	}
@@ -289,6 +298,7 @@ var Interface = (function() {
 		draw: draw,
 		getSliderValue: getSliderValue,
 		getBeatValue: getBeatValue,
+		getBeatsPerBar: getBeatsPerBar,
 		getParamString: getParamString,
 		showSliders: showSliders,
 		isBlurred: returnIsBlurred,

@@ -2,7 +2,7 @@ var Machine = (function () {
 	
 	"use strict";
 	
-	var ctx, sounds = {}, instruments = [], timerID, nextNoteTime = 0, notesInQueue = [], step = 0, reverb, playing = false, gainNode;
+	var ctx, sounds = {}, instruments = [], timerID, nextNoteTime = 0, notesInQueue = [], step = 0, reverb, playing = false, gainNode, machineTimeSignature;
 	
 	function init ( soundDataObject ) {
 		// attempt to initialise audio context
@@ -14,6 +14,7 @@ var Machine = (function () {
 		}
 		
 		reverb = ctx.createConvolver();
+		machineTimeSignature = Interface.getBeatsPerBar();
 		//reverb.connect(ctx.destination);
 		var s, decodeTally = 0, decodeTotal = 0;
 		// get number of sounds
@@ -59,7 +60,8 @@ var Machine = (function () {
 		var secondsPerBeat = 60.0 / Interface.decimalToBPM(Interface.getSliderValue("tempo"));
 		nextNoteTime += 0.25 * secondsPerBeat;
 		step += 1;
-		if(step === 16) {
+		if(step === machineTimeSignature * 4) {
+			machineTimeSignature = Interface.getBeatsPerBar();
 			step = 0;
 		}
 	}
