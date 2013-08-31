@@ -2,9 +2,14 @@
 
 // To do before sharing beta:
 // - bigger selection of beats
-// - initialise beat selection from php string
-// - unify localstorage and php string initialisation (both should use hex string)
-// - copy/paste share thing
+// - better snare
+// - organise beats by time sig and make their order future-proof
+// - proper share buttons
+// - prettier beat visualisation
+// - chunkier start stop buttons
+// - instant stop
+// - click intro
+// - proper tap tempo
 
 (function () {
 

@@ -2,7 +2,7 @@ var Machine = (function () {
 	
 	"use strict";
 	
-	var ctx, sounds = {}, instruments = [], timerID, nextNoteTime = 0, notesInQueue = [], step = 0, reverb, playing = false, gainNode, machineTimeSignature;
+	var ctx, sounds = {}, instruments = [], timerID, nextNoteTime = 0, notesInQueue = [], step = 0, playing = false, gainNode, machineTimeSignature;
 	
 	function init ( soundDataObject ) {
 		// attempt to initialise audio context
@@ -13,9 +13,9 @@ var Machine = (function () {
 			// tell user that there is a problem
 		}
 		
-		reverb = ctx.createConvolver();
+		gainNode = ctx.createGainNode();
+		gainNode.connect(ctx.destination);
 		machineTimeSignature = Interface.getBeatsPerBar();
-		//reverb.connect(ctx.destination);
 		var s, decodeTally = 0, decodeTotal = 0;
 		// get number of sounds
 		for ( s in soundDataObject ) {
@@ -40,12 +40,20 @@ var Machine = (function () {
 			nextNoteTime = ctx.currentTime;
 			playing = true;
 			scheduler();
+			gainNode.gain.value = 1;
+		} else {
+			step = 0;
+			nextNoteTime = ctx.currentTime;
+			gainNode.disconnect();
+			gainNode = ctx.createGainNode();
+			gainNode.connect(ctx.destination);
+			scheduler();
 		}
 	}
 	
 	function stopBeat() {
 		playing = false;
-		// need to figure out a way to stop the audio instantly
+		gainNode.gain.value = 0;
 	}
 	
 	function initSound ( name, data, callback ) {
@@ -70,6 +78,12 @@ var Machine = (function () {
 		if(playing) {
 			while( nextNoteTime < ctx.currentTime + Config.scheduleAheadTime + (Interface.isBlurred() ? 1.1 : 0) ) {
 				scheduleNote(step,nextNoteTime);
+				// every whole beat, do interface functions
+				if(step/4 === Math.round(step/4)) {
+					setTimeout(function(stepVal) {
+						Interface.doFlash(stepVal);
+					},1000 * (nextNoteTime - ctx.currentTime), step/4);
+				}
 				nextNote();
 			}
 			timerID = window.setTimeout( scheduler, Config.lookahead );
@@ -100,13 +114,13 @@ var Machine = (function () {
 		if($.inArray(beatNumber,[0])!=-1) {
 			// 0
 			return 1;
-		} else if($.inArray(beatNumber,[0,8])!=-1) {
+		} else if($.inArray(beatNumber,[0,8,16,24])!=-1) {
 			// 0, 8
 			return zoom > 1 ? 1 : zoom;
-		} else if($.inArray(beatNumber,[0,4,8,12])!=-1) {
+		} else if($.inArray(beatNumber,[0,4,8,12,16,20,24,28])!=-1) {
 			// 0, 4, 8, 12
 			return zoom < 1 ? 0 : zoom > 2 ? 1 : zoom - 1;
-		} else if($.inArray(beatNumber,[0,2,4,6,8,10,12,14])!=-1) {
+		} else if($.inArray(beatNumber,[0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30])!=-1) {
 			// 0, 2, 4, 6...
 			return zoom < 2 ? 0 : zoom > 3 ? 1 : zoom - 2;
 		} else {
@@ -120,10 +134,8 @@ var Machine = (function () {
 		var source = ctx.createBufferSource();
 		if(name!=="kick") source.playbackRate.value = (Interface.getSliderValue("pitch")+0.01)*2;
 		source.buffer = sounds[name];
-		source.gain.value = 0.3 * vel;
-		//source.connect(reverb);
-		//reverb.connect(ctx.destination);
-		source.connect(ctx.destination);
+		source.gain.value = 0.7 * vel;
+		source.connect(gainNode);
 		source.noteOn(t);
 	}
 	

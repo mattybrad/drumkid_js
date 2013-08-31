@@ -1,7 +1,7 @@
 var Interface = (function() {
 	
 	var colours = ['Crimson','Orange','Gold','Yellow','GreenYellow','LimeGreen','LightSkyBlue','RoyalBlue','Indigo','Violet','Crimson','Orange','Gold','Yellow','GreenYellow','LimeGreen','LightSkyBlue','RoyalBlue','Indigo','Violet'];
-	var cvs,ctx,isBlurred = false;
+	var cvs, ctx, isBlurred = false, flash = "none", flashTimeout;
 	var sliders = [
 		{
 			name: "tempo",
@@ -97,9 +97,7 @@ var Interface = (function() {
 		
 		$('body').keydown(function(ev) {
 			if(ev.which === 32) {
-				Tap.tap();
-				var tempo = Tap.getTempo();
-				if(tempo !== null) sliders[0].value = (Tap.getTempo()-30)/200;
+				processTapEvent();
 			}
 		});
 		
@@ -116,6 +114,10 @@ var Interface = (function() {
 			if(mouseIsDown) {
 				changeValue(ev.offsetX,ev.offsetY);
 			}
+		});
+		
+		$('#tap').mousedown(function(ev) {
+			processTapEvent();
 		});
 		
 		$('#start').mouseup(function(ev) {
@@ -148,6 +150,10 @@ var Interface = (function() {
 			});
 		});
 		
+		document.getElementById('tap').addEventListener('touchstart',function(ev) {
+			processTapEvent();
+		});
+		
 		document.getElementById('start').addEventListener('touchend',function(ev) {
 			Machine.startBeat();
 		});
@@ -177,6 +183,17 @@ var Interface = (function() {
 		if(phpParams[200] !== undefined) $('#beatSelect1').val(Math.round(255*phpParams[200]));
 		if(phpParams[201] !== undefined) $('#beatSelect2').val(Math.round(255*phpParams[201]));
 		if(phpParams[202] !== undefined) $('#timeSignature').val(Math.round(255*phpParams[202]));
+	}
+	
+	function processTapEvent() {
+		Tap.tap();
+		if(Tap.getTaps() === getBeatsPerBar()) {
+			var tapTempo = Tap.getTempo();
+			sliders[0].value = BPMToDecimal(tapTempo);
+			var singleBeatTime = 60000/tapTempo;
+			Tap.resetTaps();
+			setTimeout(Machine.startBeat,singleBeatTime-150);
+		}
 	}
 	
 	function showSliders() {
@@ -218,15 +235,19 @@ var Interface = (function() {
 		var sliderWidth = cvs.width/sliders.length;
 		var sliderHeight = 0.9 * cvs.height;
 		$.each(sliders,function(i,val) {
-			ctx.fillStyle = getRainbowColour(i);
+			ctx.fillStyle = getRainbowColour(i,flash);
 			ctx.fillRect(i*sliderWidth,sliderHeight,sliderWidth,-sliderHeight*(val.value));
-			//ctx.fillStyle = "#FFFFFF";
-			//ctx.fillRect(i*sliderWidth-1,0,sliderWidth+2,sliderHeight*(1-val.value));
 			ctx.fillStyle = "#000000";
 			ctx.fillText(val.name,i*sliderWidth+sliderWidth/2,1.05*sliderHeight);
 		});
 		
-		var bpmNum = Math.round(decimalToBPM(getSliderValue("tempo")*10))/10;
+		// draw tempo indicator flash
+		if(flash !== "none") {
+			ctx.fillStyle = flash;
+			ctx.fillRect(sliderWidth/3,sliderHeight-sliderWidth/3,sliderWidth/3,-sliderWidth/3);
+		}
+		
+		var bpmNum = Math.round(decimalToBPM(getSliderValue("tempo"))*10)/10;
 		var bpmString = Math.round(bpmNum) == bpmNum ? bpmNum.toString() + ".0" : bpmNum.toString();
 		$('#beatsPerMinute').html(bpmString);
 	}
@@ -293,6 +314,18 @@ var Interface = (function() {
 		return 30 + decimal * 200;
 	}
 	
+	function BPMToDecimal(bpm) {
+		return (bpm - 30) / 200;
+	}
+	
+	function doFlash(beatNum) {
+		flash = beatNum === 0 ? "white" : "gray";
+		clearTimeout(flashTimeout);
+		flashTimeout = setTimeout(function() {
+			flash = "none";
+		},200);
+	}
+	
 	return {
 		init: init,
 		draw: draw,
@@ -303,7 +336,7 @@ var Interface = (function() {
 		showSliders: showSliders,
 		isBlurred: returnIsBlurred,
 		decimalToBPM: decimalToBPM,
-		getSliderValues: function(){return sliders}
+		doFlash: doFlash
 	}
 	
 })();

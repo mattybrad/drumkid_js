@@ -48,7 +48,7 @@
 	<body>
 		<canvas id="screen" width="1200" height="800">Canvas not supported</canvas>
 		<p id="bottomSection">
-			<span id="beatsPerMinute">?</span> BPM <button id="start">Start</button> <button id="stop">Stop</button> <select id="timeSignature"><option value="3">3/4</option><option value="4" selected>4/4</option value="5"><option>5/4</option value="7"><option>7/4</option></select> <select id="beatSelect1"></select> <select id="beatSelect2"></select> / <span id="tweetButton">Tweet My Beat</span> / <span id="facebookButton">Share My Beat on Facebook</span>
+			<span id="beatsPerMinute">?</span> BPM <button id="tap">Tap tempo</button> <button id="start">Start</button> <button id="stop">Stop</button> <select id="timeSignature"><option value="3">3/4</option><option value="4" selected>4/4</option><option value="5">5/4</option><option value="7">7/4</option></select> <select id="beatSelect1"></select> <select id="beatSelect2"></select>
 		</p>
 	</body>
 </html>
