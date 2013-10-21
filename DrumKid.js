@@ -21,8 +21,8 @@
 		
 		// check compatibility
 		if(window.AudioContext===undefined&&window.webkitAudioContext===undefined) {
-			//window.location.href = "incompatible.html";
-			//return false;
+			window.location.href = "incompatible.html";
+			return false;
 		}
 		
 		// init parameters from PHP string
@@ -41,9 +41,10 @@
 		// load all audio files
 		Loader.loadAudioMultiple( Config.samples, function () {
 			setTimeout(function() {
+				$('#bottomSection').css('visibility','visible');
 				Machine.init( Loader.sounds );
 				Interface.showSliders();
-			},1000);
+			},3000);
 		});
 	};
 	

@@ -15,6 +15,7 @@
 			
 			#bottomSection {
 				text-align: center;
+				visibility: hidden;
 			}
 			
 			#tweetButton,#facebookButton {
@@ -66,6 +67,17 @@
 			#infoBox {
 				text-align: left;
 			}
+			
+			select {
+				height: 60px;
+				background: #CCCCCC;
+				font-size: 16px;
+				border-radius: 20px;
+				border: none;
+				min-width: 60px;
+				padding: 10px;
+				font-family: "Open Sans",Arial, Helvetica, sans-serif;
+			}
 		</style>
 		<script>
 			var drumKidPhpInitString = "<?php echo $_GET['b']; ?>";
@@ -84,15 +96,8 @@
 	<body>
 		<canvas id="screen" width="1200" height="800">Canvas not supported</canvas>
 		<p id="bottomSection">
-			<span class="chunkyButton" id="tap"><span id="beatsPerMinute">?</span> BPM </span> <span class="chunkyButton" id="start">Start</span> <span class="chunkyButton" id="stop">Stop</span> <span class="chunkyButton" id="timeSignatureButton">4/4</span> <span class="chunkyButton" id="beatSelectButton1">Rock</span> <span class="chunkyButton" id="beatSelectButton2">March</span> <span class="chunkyButton" id="infoButton">Info</span> <select id="timeSignature"><option value="3">3/4</option><option value="4" selected>4/4</option><option value="5">5/4</option><option value="6">6/8</option><option value="7">7/4</option><option value="9">9/4</option></select> <select id="beatSelect1"></select> <select id="beatSelect2"></select>
+			<span class="chunkyButton" id="tap"><span id="beatsPerMinute">?</span> BPM </span> <span class="chunkyButton" id="start">Start</span> <span class="chunkyButton" id="stop">Stop</span> <span class="chunkyButton" id="infoButton">Info</span> <select id="timeSignature"><option value="3">3/4</option><option value="4" selected>4/4</option><option value="5">5/4</option><option value="6">6/8</option><option value="7">7/4</option><option value="9">9/4</option></select> <select id="beatSelect1"></select> <select id="beatSelect2"></select>
 		</p>
-		<div id="timeSigSelect" class="bigWindow">
-			<span>3/4</span><br>
-			<span>4/4</span><br>
-			<span>5/4</span><br>
-			<span>7/4</span><br>
-			<span>9/4</span>
-		</div>
 		<div id="infoBox" class="bigWindow">
 			<h2>What is DrumKid?</h2>
 			DrumKid is a drum machine for your web browser. It's designed for live performance, so you can adjust the beat in real time.

@@ -51,7 +51,7 @@ var Machine = (function () {
 	}
 	
 	function doConnections() {
-		gainNode = ctx.createGainNode();
+		gainNode = ctx.createGain();
 		filterNode = ctx.createBiquadFilter();
 		delayNode = ctx.createDelayNode();
 		gainNode.connect(filterNode);

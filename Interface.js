@@ -54,10 +54,6 @@ var Interface = (function() {
 			id: 10
 		},
 		{
-			name: "volume",
-			id: 11
-		},
-		{
 			name: "resonance",
 			id: 12
 		},
@@ -74,8 +70,8 @@ var Interface = (function() {
 			id: 15
 		},
 		{
-			name: "reverb",
-			id: 16
+			name: "volume",
+			id: 11
 		}
 	]
 	
@@ -116,7 +112,22 @@ var Interface = (function() {
 		logoImg.onload = onLogoLoad;
 		logoImg.src = "graphics/logo.png";
 		function onLogoLoad() {
-			ctx.drawImage(logoImg,0.25*cvs.width,0.5*cvs.height - 0.2*(logoImg.height/logoImg.width) * cvs.width,0.5*cvs.width,0.5*(logoImg.height/logoImg.width) * cvs.width);
+			//ctx.drawImage(logoImg,0.25*cvs.width,0.5*cvs.height - 0.2*(logoImg.height/logoImg.width) * cvs.width,0.5*cvs.width,0.5*(logoImg.height/logoImg.width) * cvs.width);
+			ctx.save();
+			var word = "DrumKid";
+			ctx.font = "Bold " + Math.round(0.2 * ctx.canvas.height).toString() + "px Open Sans";
+			var widthTally = 0;
+			var rainbowOffset = Math.random() * 50;
+			for(var i = 0; i < word.length; i ++) {
+				ctx.fillStyle = getRainbowColour(1.5 * i + rainbowOffset);
+				ctx.fillText(word.charAt(i), ctx.canvas.width/2 + widthTally - ctx.measureText(word).width / 2, 0.55 * ctx.canvas.height);
+				widthTally += ctx.measureText(word.charAt(i)).width;
+			}
+			ctx.fillStyle = '#333333';
+			ctx.font = "40px Open Sans";
+			ctx.textAlign = "center";
+			ctx.fillText("by Matt Bradshaw", ctx.canvas.width / 2, 0.65 * ctx.canvas.height);
+			ctx.restore();				
 		}
 		
 		$('body').keydown(function(ev) {
@@ -128,9 +139,14 @@ var Interface = (function() {
 		$('#screen').mousedown(function(ev) {
 			changeValue(ev.offsetX,ev.offsetY);
 			mouseIsDown = true;
+			$('#infoBox').toggle(false);
 		});
 		
 		$('#screen').mouseup(function(ev) {
+			mouseIsDown = false;
+		});
+		
+		$('#screen').mouseout(function(ev) {
 			mouseIsDown = false;
 		});
 		
@@ -163,7 +179,7 @@ var Interface = (function() {
 		});
 		
 		$('#infoButton').click(function(ev) {
-			$('#infoBox').show();
+			$('#infoBox').toggle();
 		});
 		
 		document.getElementById('screen').addEventListener('touchmove',function(ev) {
