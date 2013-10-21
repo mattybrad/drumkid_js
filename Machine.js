@@ -2,7 +2,7 @@ var Machine = (function () {
 	
 	"use strict";
 	
-	var ctx, sounds = {}, instruments = [], timerID, nextNoteTime = 0, notesInQueue = [], step = 0, playing = false, gainNode, machineTimeSignature;
+	var ctx, sounds = {}, instruments = [], timerID, nextNoteTime = 0, notesInQueue = [], step = 0, playing = false, gainNode, filterNode, delayNode, delayGainNode, machineTimeSignature;
 	
 	function init ( soundDataObject ) {
 		// attempt to initialise audio context
@@ -13,8 +13,8 @@ var Machine = (function () {
 			// tell user that there is a problem
 		}
 		
-		gainNode = ctx.createGainNode();
-		gainNode.connect(ctx.destination);
+		doConnections();
+	
 		machineTimeSignature = Interface.getBeatsPerBar();
 		var s, decodeTally = 0, decodeTotal = 0;
 		// get number of sounds
@@ -45,10 +45,23 @@ var Machine = (function () {
 			step = 0;
 			nextNoteTime = ctx.currentTime;
 			gainNode.disconnect();
-			gainNode = ctx.createGainNode();
-			gainNode.connect(ctx.destination);
+			doConnections();
 			scheduler();
 		}
+	}
+	
+	function doConnections() {
+		gainNode = ctx.createGainNode();
+		filterNode = ctx.createBiquadFilter();
+		delayNode = ctx.createDelayNode();
+		gainNode.connect(filterNode);
+		delayGainNode = ctx.createGain();
+		filterNode.connect(delayNode);
+		delayGainNode.gain.value = 0;
+		delayNode.connect(delayGainNode);
+		delayGainNode.connect(delayNode);
+		delayGainNode.connect(ctx.destination);
+		filterNode.connect(ctx.destination);
 	}
 	
 	function stopBeat() {
@@ -76,13 +89,17 @@ var Machine = (function () {
 	
 	function scheduler() {
 		if(playing) {
+			filterNode.frequency.value = 8000 * Interface.getSliderValue("cutoff");
+			filterNode.Q.value = 0.01 + 20 * Interface.getSliderValue("resonance");
+			delayNode.delayTime.value = 0.01 + 3 * Interface.getSliderValue("delay time");
+			delayGainNode.gain.value = Interface.getSliderValue("delay level");
 			while( nextNoteTime < ctx.currentTime + Config.scheduleAheadTime + (Interface.isBlurred() ? 1.1 : 0) ) {
 				scheduleNote(step,nextNoteTime);
 				// every whole beat, do interface functions
 				if(step/4 === Math.round(step/4)) {
 					setTimeout(function(stepVal) {
 						Interface.doFlash(stepVal);
-					},1000 * (nextNoteTime - ctx.currentTime), step/4);
+					},1000 * (nextNoteTime - ctx.currentTime) + 80, step/4);
 				}
 				nextNote();
 			}
@@ -143,7 +160,8 @@ var Machine = (function () {
 		init : init,
 		startBeat: startBeat,
 		stopBeat: stopBeat,
-		context: function(){return ctx}
+		context: function(){return ctx},
+		d: function(){return delayNode}
 	};
 	
 }());

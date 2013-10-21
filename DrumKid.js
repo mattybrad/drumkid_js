@@ -7,9 +7,7 @@
 // - proper share buttons
 // - prettier beat visualisation
 // - chunkier start stop buttons
-// - instant stop
 // - click intro
-// - proper tap tempo
 
 (function () {
 

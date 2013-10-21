@@ -56,6 +56,26 @@ var Interface = (function() {
 		{
 			name: "volume",
 			id: 11
+		},
+		{
+			name: "resonance",
+			id: 12
+		},
+		{
+			name: "cutoff",
+			id: 13
+		},
+		{
+			name: "delay time",
+			id: 14
+		},
+		{
+			name: "delay level",
+			id: 15
+		},
+		{
+			name: "reverb",
+			id: 16
 		}
 	]
 	
@@ -74,14 +94,18 @@ var Interface = (function() {
 			});
 		}
 		
+		$('.bigWindow').hide();
 		cvs = $('#screen')[0];
 		cvs.width = window.innerWidth;
 		cvs.height = window.innerHeight - 100;
 		window.onresize = function() {
 			cvs.width = window.innerWidth;
 			cvs.height = window.innerHeight - 100;
+			ctx = cvs.getContext('2d');
+			ctx.font = "12px Open Sans";
 		}
 		ctx = cvs.getContext('2d');
+		ctx.font = "12px Open Sans";
 		
 		$.each(sliders,function(i,val) {
 			if(!val.value) val.value = 0;
@@ -136,6 +160,10 @@ var Interface = (function() {
 		
 		$('#facebookButton').click(function(ev) {
 			window.location.href = "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent("http://mattbradshawdesign.com/lab/drumkid/?b=" + getParamString());
+		});
+		
+		$('#infoButton').click(function(ev) {
+			$('#infoBox').show();
 		});
 		
 		document.getElementById('screen').addEventListener('touchmove',function(ev) {
@@ -206,7 +234,7 @@ var Interface = (function() {
 	
 	function getRainbowColour(value) {
 		
-		var freq = 5 / sliders.length;
+		var freq = 10 / sliders.length;
 		value *= freq;
 		
 		function numToHex(num) {
@@ -235,16 +263,19 @@ var Interface = (function() {
 		var sliderWidth = cvs.width/sliders.length;
 		var sliderHeight = 0.9 * cvs.height;
 		$.each(sliders,function(i,val) {
-			ctx.fillStyle = getRainbowColour(i,flash);
+			ctx.fillStyle = getRainbowColour(i);
 			ctx.fillRect(i*sliderWidth,sliderHeight,sliderWidth,-sliderHeight*(val.value));
 			ctx.fillStyle = "#000000";
-			ctx.fillText(val.name,i*sliderWidth+sliderWidth/2,1.05*sliderHeight);
+			ctx.fillText(val.name,i*sliderWidth+sliderWidth/2,1.03*sliderHeight);
 		});
 		
 		// draw tempo indicator flash
 		if(flash !== "none") {
-			ctx.fillStyle = flash;
-			ctx.fillRect(sliderWidth/3,sliderHeight-sliderWidth/3,sliderWidth/3,-sliderWidth/3);
+			//ctx.fillStyle = flash;
+			//ctx.fillRect(sliderWidth/3,sliderHeight-sliderWidth/3,sliderWidth/3,-sliderWidth/3);
+			//$('#tap').css('background',flash);
+		} else {
+			//$('#tap').css('background','#CCCCCC');
 		}
 		
 		var bpmNum = Math.round(decimalToBPM(getSliderValue("tempo"))*10)/10;
@@ -319,11 +350,13 @@ var Interface = (function() {
 	}
 	
 	function doFlash(beatNum) {
-		flash = beatNum === 0 ? "white" : "gray";
+		flash = beatNum === 0 ? "#00DD00" : "#999999";
+		$('#tap').css('background',flash);
 		clearTimeout(flashTimeout);
 		flashTimeout = setTimeout(function() {
+			$('#tap').css('background','#cccccc');
 			flash = "none";
-		},200);
+		},100);
 	}
 	
 	return {
