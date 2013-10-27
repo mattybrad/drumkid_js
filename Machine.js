@@ -89,9 +89,9 @@ var Machine = (function () {
 	
 	function scheduler() {
 		if(playing) {
-			filterNode.frequency.value = 8000 * Interface.getSliderValue("cutoff");
+			filterNode.frequency.value = Config.conversions.decimalToCutoffFreq(Interface.getSliderValue("cutoff"));
 			filterNode.Q.value = 0.01 + 20 * Interface.getSliderValue("resonance");
-			delayNode.delayTime.value = 0.01 + 3 * Interface.getSliderValue("delay time");
+			delayNode.delayTime.value = Config.conversions.decimalToDelayTime(Interface.getSliderValue("delay time"));
 			delayGainNode.gain.value = Interface.getSliderValue("delay level");
 			while( nextNoteTime < ctx.currentTime + Config.scheduleAheadTime + (Interface.isBlurred() ? 1.1 : 0) ) {
 				scheduleNote(step,nextNoteTime);
@@ -120,29 +120,29 @@ var Machine = (function () {
 			var snareMultiplier = val === "snare" ? Interface.getSliderValue("snare") : 1;
 			var hyperMultiplier = $.inArray(val,["clap"])!=-1 ? 0 : Interface.getSliderValue("hyperactivity");
 			var vel = kickMultiplier * snareMultiplier * tomMultiplier * percussionMultiplier * zoomMultiplier * Math.min(blendedBeat + Math.random()*0.6 * hyperMultiplier,1);
-			if(vel < Interface.getSliderValue("ceiling")) vel = 0;
+			if(vel < Config.conversions.decimalToCeilingLevel(Interface.getSliderValue("ceiling"))) vel = 0;
 			vel *= Interface.getSliderValue("volume");
-			playSound(val,2*vel,time+Math.random()*0.1*Interface.getSliderValue("sloppiness"));
+			playSound(val,2*vel,time+Math.random()*0.3*Config.conversions.decimalToSloppiness(Interface.getSliderValue("sloppiness")));
 		});
 	}
 	
 	function getZoomMultiplier(beatNumber) {
-		var zoom = 5*Interface.getSliderValue("zoom");
-		if($.inArray(beatNumber,[0])!=-1) {
+		var zoom = 6*Interface.getSliderValue("zoom");
+		if($.inArray(beatNumber,[0,16])!=-1) {
 			// 0
-			return 1;
+			return zoom > 1 ? 1 : zoom;
 		} else if($.inArray(beatNumber,[0,8,16,24])!=-1) {
 			// 0, 8
-			return zoom > 1 ? 1 : zoom;
+			return zoom < 1 ? 0 : zoom > 2 ? 1 : zoom - 1;
 		} else if($.inArray(beatNumber,[0,4,8,12,16,20,24,28])!=-1) {
 			// 0, 4, 8, 12
-			return zoom < 1 ? 0 : zoom > 2 ? 1 : zoom - 1;
+			return zoom < 2 ? 0 : zoom > 3 ? 1 : zoom - 2;
 		} else if($.inArray(beatNumber,[0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30])!=-1) {
 			// 0, 2, 4, 6...
-			return zoom < 2 ? 0 : zoom > 3 ? 1 : zoom - 2;
+			return zoom < 3 ? 0 : zoom > 4 ? 1 : zoom - 3;
 		} else {
 			// 0, 1, 2, 3, 4...
-			return zoom < 3 ? 0 : zoom > 4 ? 1 : zoom - 3;
+			return zoom < 4 ? 0 : zoom > 5 ? 1 : zoom - 4;
 		}
 		return 0;
 	}
@@ -160,6 +160,7 @@ var Machine = (function () {
 		init : init,
 		startBeat: startBeat,
 		stopBeat: stopBeat,
+		isPlaying: function() { return playing; },
 		context: function(){return ctx},
 		d: function(){return delayNode}
 	};

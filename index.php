@@ -7,6 +7,12 @@
 		<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
 		<style>
 			body {
+				-webkit-touch-callout: none;
+				-webkit-user-select: none;
+				-khtml-user-select: none;
+				-moz-user-select: none;
+				-ms-user-select: none;
+				user-select: none;
 				font-family: "Open Sans",Arial, Helvetica, sans-serif;
 				margin: 0 0 0 0;
 				padding: 0 0 0 0;
@@ -16,15 +22,12 @@
 			#bottomSection {
 				text-align: center;
 				visibility: hidden;
+				padding: 10px;
 			}
 			
-			#tweetButton,#facebookButton {
-				text-decoration: underline;
-				cursor: pointer;
-			}
-			
-			#tweetButton:hover,#facebookButton:hover {
-				color: #999999;
+			.splitter {
+				display: inline-block;
+				text-align: center;
 			}
 			
 			#beatsPerMinute {
@@ -59,11 +62,6 @@
 				text-align: center;
 			}
 			
-			.bigWindow span {
-				cursor: pointer;
-				text-decoration: underline;
-			}
-			
 			#infoBox {
 				text-align: left;
 			}
@@ -77,6 +75,27 @@
 				min-width: 60px;
 				padding: 10px;
 				font-family: "Open Sans",Arial, Helvetica, sans-serif;
+			}
+			
+			#myBeats {
+				text-align: left;
+			}
+			
+			#newBeatName {
+				width: 300px;
+			}
+			
+			#myBeats>ul>li {
+				cursor: pointer;
+				text-align: left;
+			}
+			
+			#bgCanvas {
+				position: absolute;
+				top: 0;
+				left: 0;
+				background: #00FF00;
+				z-index: -1;
 			}
 		</style>
 		<script>
@@ -95,9 +114,21 @@
 	</head>
 	<body>
 		<canvas id="screen" width="1200" height="800">Canvas not supported</canvas>
-		<p id="bottomSection">
-			<span class="chunkyButton" id="tap"><span id="beatsPerMinute">?</span> BPM </span> <span class="chunkyButton" id="start">Start</span> <span class="chunkyButton" id="stop">Stop</span> <span class="chunkyButton" id="infoButton">Info</span> <select id="timeSignature"><option value="3">3/4</option><option value="4" selected>4/4</option><option value="5">5/4</option><option value="6">6/8</option><option value="7">7/4</option><option value="9">9/4</option></select> <select id="beatSelect1"></select> <select id="beatSelect2"></select>
-		</p>
+		<div id="bottomSection">
+			<canvas id="bgCanvas"></canvas>
+			<div class="splitter"><span class="chunkyButton" id="tap"><span id="beatsPerMinute">?</span> BPM </span> <span class="chunkyButton" id="start">Start</span> <span class="chunkyButton" id="stop">Stop</span> <span class="chunkyButton" id="infoButton">Info</span> <select id="timeSignature"><option value="3">3/4</option><option value="4" selected>4/4</option><option value="5">5/4</option><option value="6">6/8</option><option value="7">7/4</option><option value="9">9/4</option></select> <select id="beatSelect1"></select> <select id="beatSelect2"></select></div> <div class="splitter"><span class="chunkyButton" id="tweet">Tweet Beat</span> <span class="chunkyButton" id="share">Share Beat</span> <span class="chunkyButton" id="myBeatsButton">My Beats</span></div> 
+		</div>
+		<div id="alertMessage" class="bigWindow">
+			<h2>Alert</h2>
+			<p id="alertMessageText"></p>
+		</div>
+		<div id="myBeats" class="bigWindow">
+			<h2>Save Current Beat</h2>
+			<input type="text" id="newBeatName" value="New Beat"><br><br>
+			<span id="saveBeatButton" class="chunkyButton">Save Current Beat</span><br>
+			<h2>Load Saved Beat</h2>
+			<ul></ul>
+		</div>
 		<div id="infoBox" class="bigWindow">
 			<h2>What is DrumKid?</h2>
 			DrumKid is a drum machine for your web browser. It's designed for live performance, so you can adjust the beat in real time.
