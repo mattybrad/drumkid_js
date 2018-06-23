@@ -1,9 +1,9 @@
 var Machine = (function () {
-	
+
 	"use strict";
-	
+
 	var ctx, sounds = {}, instruments = [], timerID, nextNoteTime = 0, notesInQueue = [], step = 0, playing = false, gainNode, filterNode, delayNode, delayGainNode, machineTimeSignature;
-	
+
 	function init ( soundDataObject ) {
 		// attempt to initialise audio context
 		try {
@@ -12,9 +12,9 @@ var Machine = (function () {
 		} catch ( e ) {
 			// tell user that there is a problem
 		}
-		
+
 		doConnections();
-	
+
 		machineTimeSignature = Interface.getBeatsPerBar();
 		var s, decodeTally = 0, decodeTotal = 0;
 		// get number of sounds
@@ -22,18 +22,18 @@ var Machine = (function () {
 			decodeTotal += 1;
 			instruments.push(s);
 		}
-		
+
 		for ( s in soundDataObject ) {
 			initSound( s, soundDataObject[s], function() {
 				decodeTally += 1;
 				if (decodeTally === decodeTotal) {
 					// drum machine is ready to start (all sounds ready)
-					
+
 				}
 			});
 		}
 	}
-	
+
 	function startBeat() {
 		if(playing === false) {
 			step = 0;
@@ -49,11 +49,11 @@ var Machine = (function () {
 			scheduler();
 		}
 	}
-	
+
 	function doConnections() {
 		gainNode = ctx.createGain();
 		filterNode = ctx.createBiquadFilter();
-		delayNode = ctx.createDelayNode();
+		delayNode = ctx.createDelay();
 		gainNode.connect(filterNode);
 		delayGainNode = ctx.createGain();
 		filterNode.connect(delayNode);
@@ -63,19 +63,19 @@ var Machine = (function () {
 		delayGainNode.connect(ctx.destination);
 		filterNode.connect(ctx.destination);
 	}
-	
+
 	function stopBeat() {
 		playing = false;
 		gainNode.gain.value = 0;
 	}
-	
+
 	function initSound ( name, data, callback ) {
 		ctx.decodeAudioData( data, function( buffer ) {
 			sounds[name] = buffer;
 			callback();
 		} );
 	}
-	
+
 	function nextNote() {
 		//var secondsPerBeat = 60.0 / (30+Interface.getSliderInterface.getSliderValue("tempo")*200);
 		var secondsPerBeat = 60.0 / Interface.decimalToBPM(Interface.getSliderValue("tempo"));
@@ -86,7 +86,7 @@ var Machine = (function () {
 			step = 0;
 		}
 	}
-	
+
 	function scheduler() {
 		if(playing) {
 			filterNode.frequency.value = Config.conversions.decimalToCutoffFreq(Interface.getSliderValue("cutoff"));
@@ -106,7 +106,7 @@ var Machine = (function () {
 			timerID = window.setTimeout( scheduler, Config.lookahead );
 		}
 	}
-	
+
 	function scheduleNote(beatNumber,time) {
 		notesInQueue.push( { note: beatNumber, time: time} );
 		var zoomMultiplier = getZoomMultiplier(beatNumber);
@@ -125,7 +125,7 @@ var Machine = (function () {
 			playSound(val,2*vel,time+Math.random()*0.3*Config.conversions.decimalToSloppiness(Interface.getSliderValue("sloppiness")));
 		});
 	}
-	
+
 	function getZoomMultiplier(beatNumber) {
 		var zoom = 6*Interface.getSliderValue("zoom");
 		if($.inArray(beatNumber,[0,16])!=-1) {
@@ -146,16 +146,18 @@ var Machine = (function () {
 		}
 		return 0;
 	}
-	
+
 	function playSound(name,vel,t) {
 		var source = ctx.createBufferSource();
 		if(name!=="kick") source.playbackRate.value = (Interface.getSliderValue("pitch")+0.01)*2;
 		source.buffer = sounds[name];
-		source.gain.value = 0.7 * vel;
-		source.connect(gainNode);
-		source.noteOn(t);
+		var sourceGain = ctx.createGain();
+		sourceGain.gain.value = 0.7 * vel;
+		source.connect(sourceGain);
+		sourceGain.connect(gainNode);
+		source.start(t);
 	}
-	
+
 	return {
 		init : init,
 		startBeat: startBeat,
@@ -164,5 +166,5 @@ var Machine = (function () {
 		context: function(){return ctx},
 		d: function(){return delayNode}
 	};
-	
+
 }());
